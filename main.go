@@ -1,9 +1,7 @@
 package main
 
-import (
-	"github.com/pacna/scrapenator/cmd"
-)
+import "github.com/pacna/goober/internal/app"
 
 func main() {
-	cmd.Execute()
+	app.Run()
 }

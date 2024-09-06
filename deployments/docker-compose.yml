@@ -1,9 +1,0 @@
-version: "2"
-
-services:
-    scrapenator:
-        build:
-            context: ../
-            dockerfile: ./deployments/Dockerfile
-        ports:
-            - 5000:5000
