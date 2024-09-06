@@ -2,6 +2,8 @@
 
 Goober is a fast and easy-to-use command line web scraper that effortlessly extract images from web pages.
 
+<img alt="Test passing" src="https://github.com/pacna/goober/workflows/Test/badge.svg" />
+
 ## Prerequisites
 
 Before using Goober, make sure you have the following tools and components installed:
