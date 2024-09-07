@@ -1,12 +1,10 @@
 package scraper
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -33,7 +31,11 @@ func (s *Scraper) Configure() *Scraper {
 		panic("Unable to process due to validation error")
 	}
 
-	body := s.getResponseBody(s.inputURL)
+	if !utility.IsEmpty(s.zipDest) && !utility.IsValidPath(s.zipDest) {
+		panic("Path is invalid")
+	}
+
+	body := zipper.GetResponseAsReader(s.inputURL)
 
 	if (body == nil) {
 		panic("Unable to get response from URL")
@@ -54,27 +56,6 @@ func (s *Scraper) validate(inputURL string) error {
 	}
 
 	return nil
-}
-
-func (s *Scraper) getResponseBody(inputURL string) io.Reader {
-	var buffer bytes.Buffer
-	response, err := http.Get(inputURL)
-
-	if err != nil {
-		return nil
-	}
-
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return nil
-	}
-
-	buffer.ReadFrom(response.Body)
-
-	body := io.NopCloser(&buffer)
-
-	return body
 }
 
 func (s *Scraper) Run() {
@@ -100,7 +81,7 @@ func (s *Scraper) Run() {
 		}
 	})
 
-	var imgURLsSize int64 = 0
+	var imgURLsSize int64
 
 	for imgURL := range uniqueImgURLs {
 		fmt.Printf("%q\n", imgURL)
@@ -110,8 +91,10 @@ func (s *Scraper) Run() {
 	}
 
 	if !utility.IsEmpty(s.zipDest) {
-		fmt.Println("\n\nZipping to folder")
-		zipper.DownloadImages(s.zipDest, s.inputURL, imgURLs, imgURLsSize) 
+		fmt.Println("\n\nCompressing into a zip file")
+		fileName, _ := zipper.DownloadImages(s.zipDest, s.inputURL, imgURLs, imgURLsSize)
+		
+		fmt.Printf("\n\n%s was created\n", fileName)
 	}
 }
 

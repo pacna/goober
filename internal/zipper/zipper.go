@@ -18,9 +18,9 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-
-func DownloadImages(outputPath string, userInputURL string, imgURLs []string, size int64) error {
-	destZipFilePath := filepath.Join(outputPath, strconv.FormatInt(time.Now().Unix(), 10) + ".zip")
+func DownloadImages(outputPath string, userInputURL string, imgURLs []string, size int64) (string, error) {
+	var fileName string = strconv.FormatInt(time.Now().Unix(), 10) + ".zip"
+	destZipFilePath := filepath.Join(outputPath, fileName)
 	zipFile, _ := os.Create(destZipFilePath)
 	zipWriter := zip.NewWriter(zipFile)
 	
@@ -37,7 +37,7 @@ func DownloadImages(outputPath string, userInputURL string, imgURLs []string, si
 		time.Sleep(40 * time.Millisecond)
 	}
 
-	return nil
+	return fileName, nil
 }
 
 
@@ -48,20 +48,15 @@ func createFileName(fileNameFromURL string, index int) string {
 	cleanFileName := reg.ReplaceAllString(fileNameFromURLSegments[0], "")
 	cleanFileExtension := reg.ReplaceAllString(fileNameFromURLSegments[1], "")
 
-	fileName := ""
-
 	if utility.IsEmpty(cleanFileName) {
-		fileName = fmt.Sprintf("%d.%s", index, cleanFileExtension)
-	} else {
-		fileName = fmt.Sprintf("%s_%d.%s", cleanFileName, index, cleanFileExtension)
+		return fmt.Sprintf("%d.%s", index, cleanFileExtension)
 	}
 
-
-	return fileName
+	return fmt.Sprintf("%s_%d.%s", cleanFileName, index, cleanFileExtension)
 }
 
 func appendImageToZip(userInputURL string, info zipInfo) error {
-	image := storeImage(userInputURL, info.imgURL)
+	image := GetResponseAsReader(createImgURL(userInputURL, info.imgURL))
 
 	zipFileHeader := &zip.FileHeader{
 		Name:   info.fileName,
@@ -79,24 +74,27 @@ func appendImageToZip(userInputURL string, info zipInfo) error {
 	return nil
 }
 
-func storeImage(baseURL string, imgURL string) io.Reader {
+func GetResponseAsReader(inputURL string) io.Reader {
 	var buffer bytes.Buffer
-	response, err := http.Get(createImgURL(baseURL, imgURL))
+	response, err := http.Get(inputURL)
 
 	if err != nil {
 		log.Fatal(err)
+		return nil
 	}
 
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		log.Fatal("Status is not returning a success code", response.StatusCode, response.Status)
+		return nil
 	}
 
 	_, err = buffer.ReadFrom(response.Body)
 
 	if err != nil {
 		log.Fatal("Unable to read from buffer")
+		return nil
 	}
 
 	imageBody := io.NopCloser(&buffer)

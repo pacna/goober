@@ -23,10 +23,10 @@ $ go install github.com/pacna/goober@latest
 Run Goober and specify the web page you want to scrape:
 
 ```bash
-$ goober --input https://www.google.com/ --zipdest /path/to/folder
+$ goober --input https://www.google.com/ --outdir /path/to/folder
 ```
 
 ### Flags
 
 1. `--input`: Specifies the URL of the web page you want to scrape.
-2. `--zipdest`: Defines the destination path where all scraped images will be zipped. (Optional)
+2. `--outdir`: Defines the destination path where all scraped images will be zipped. (Optional)

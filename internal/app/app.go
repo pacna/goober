@@ -12,7 +12,7 @@ import (
 
 func Run() {
 	userInput := flag.String("input", "", "Specifies the URL of the web page you want to scrape");
-	zipDest := flag.String("zipdest", "", "Defines the destination path where all scraped images will be zipped")
+	zipDest := flag.String("outdir", "", "Defines the destination path where all scraped images will be zipped")
 
 	flag.Parse()
 
